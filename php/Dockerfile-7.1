@@ -7,7 +7,13 @@ MAINTAINER Maxence POUTORD <maxence.poutord@gmail.com>
 RUN apt-get update && apt-get install -y \
     openssl \
     git \
-    unzip
+    unzip \
+    php-xdebug \
+    php5-xdebug \
+    make ruby ruby-dev \
+    sass \
+    compass 
+    
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
