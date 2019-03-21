@@ -39,3 +39,10 @@ RUN echo 'alias sf="php app/console"' >> ~/.bashrc \
 && echo 'alias sf3="php bin/console"' >> ~/.bashrc
 
 WORKDIR /var/www/symfony
+
+RUN apt-get update -y \
+  && apt-get install -y \
+    libxml2-dev \
+    php-soap \
+  && apt-get clean -y \
+  && docker-php-ext-install soap
