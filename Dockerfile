@@ -7,11 +7,10 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip
     
-RUN sudo apt install curl 
 
-RUN sudo apt-get install make ruby ruby-dev
+RUN apt-get install make ruby ruby-dev
 
-RUN sudo gem install sass \
+RUN gem install sass \
     compass
     
 
