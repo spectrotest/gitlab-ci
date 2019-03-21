@@ -3,10 +3,6 @@ FROM php:5.6-fpm
 RUN apt-get update && \
     apt-get install -y libmcrypt-dev libpq-dev netcat && \
     rm -rf /var/lib/apt/
-    
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-&& composer --versionlists/*
 
 RUN docker-php-ext-install \
         mcrypt \
@@ -25,6 +21,10 @@ RUN docker-php-ext-install \
 #install compass 
 RUN gem install --no-rdoc --no-ri compass
 
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+&& composer --version
+
 #install ext-soap
 RUN apt-get update -y \
   && apt-get install -y \
@@ -32,10 +32,6 @@ RUN apt-get update -y \
     php-soap \
   && apt-get clean -y \
   && docker-php-ext-install soap
-  
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-&& composer --version
 
 RUN yes | pecl install xdebug-beta \
         && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
