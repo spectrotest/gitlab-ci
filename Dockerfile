@@ -1,45 +1,44 @@
-FROM php:5.6-fpm
+# See https://github.com/docker-library/php/blob/master/7.1/fpm/Dockerfile
+FROM php:7.1-fpm
+ARG TIMEZONE
 
-RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
-
-RUN apt-get update && \
-    apt-get install -y libmcrypt-dev libpq-dev netcat && \
-    rm -rf /var/lib/apt/
-RUN apt-get install -qq -y libgd-dev libfreetype6-dev libjpeg62-turbo-dev libpng12-dev
-docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
-docker-php-ext-install gd
-
-RUN docker-php-ext-install \
-        mcrypt \
-        bcmath \
-        mbstring \
-        openssl \
-        git \
-        unzip \
-        zip \
-        opcache \
-        mysqli \
-        pdo pdo_mysql\
-        make ruby ruby-dev \
-        sass
-        
-#install compass 
-RUN gem install --no-rdoc --no-ri compass
+RUN apt-get update && apt-get install -y \
+    openssl \
+    git \
+    unzip \
+    make ruby ruby-dev \
+    php-xdebug
+  
+RUN sudo gem install sass \
+    compass
+    
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
 && composer --version
 
-#install ext-soap
-RUN apt-get update -y \
-  && apt-get install -y \
-    libxml2-dev \
-    php-soap \
-  && apt-get clean -y \
-  && docker-php-ext-install soap
+# Set timezone
+RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone \
+&& printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini \
+&& "date"
 
-RUN yes | pecl install xdebug-beta \
-        && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
-        && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/xdebug.ini \
-        && echo "xdebug.remote_autostart=on" >> /usr/local/etc/php/conf.d/xdebug.ini \
-        && echo "xdebug.remote_connect_back=on" >> /usr/local/etc/php/conf.d/xdebug.ini
+# Type docker-php-ext-install to see available extensions
+RUN docker-php-ext-install pdo pdo_mysql
+
+
+# install xdebug
+RUN pecl install xdebug \
+&& docker-php-ext-enable xdebug \
+&& echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "display_startup_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+
+RUN echo 'alias sf="php app/console"' >> ~/.bashrc \
+&& echo 'alias sf3="php bin/console"' >> ~/.bashrc
+
+WORKDIR /var/www/symfony
