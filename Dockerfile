@@ -2,7 +2,11 @@ FROM php:5.6-fpm
 
 RUN apt-get update && \
     apt-get install -y libmcrypt-dev libpq-dev netcat && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/
+    
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+&& composer --versionlists/*
 
 RUN docker-php-ext-install \
         mcrypt \
