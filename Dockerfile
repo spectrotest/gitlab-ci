@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     unzip
     
 
-RUN apt-get install make ruby ruby-dev
+RUN sudo apt install ruby ruby-dev
 
 RUN gem install sass \
     compass
