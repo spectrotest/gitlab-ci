@@ -1,40 +1,40 @@
+# See https://github.com/docker-library/php/blob/master/7.1/fpm/Dockerfile
 FROM php:7.1-fpm
+ARG TIMEZONE
 
-ENTRYPOINT ["entrypoint"]
+MAINTAINER Maxence POUTORD <maxence.poutord@gmail.com>
 
-ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV COMPOSER_HOME /home/.composer
-ENV APCU_VERSION 5.1.9
-ENV GOSU_VERSION 1.10
+RUN apt-get update && apt-get install -y \
+    openssl \
+    git \
+    unzip
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        ca-certificates \
-        git \
-        libicu-dev \
-        openssh-client \
-        unzip \
-        zlib1g-dev && \
-    docker-php-ext-install \
-        mbstring \
-        intl \
-        opcache && \
-    pecl install \
-        apcu-${APCU_VERSION} && \
-    docker-php-ext-enable \
-        apcu && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    echo "short_open_tag = off" >> /usr/local/etc/php/php.ini && \
-    echo "date.timezone = Europe/Paris" >> /usr/local/etc/php/conf.d/symfony.ini && \
-    echo "opcache.max_accelerated_files = 20000" >> /usr/local/etc/php/conf.d/symfony.ini && \
-    echo "realpath_cache_size=4096K" >> /usr/local/etc/php/conf.d/symfony.ini && \
-    echo "realpath_cache_ttl=600" >> /usr/local/etc/php/conf.d/symfony.ini && \
-    curl -L -s -o /bin/gosu https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-$(dpkg --print-architecture | awk -F- '{ print $NF }') && \
-    chmod +x /bin/gosu && \
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && php composer-setup.php --install-dir=/usr/local/bin --filename=composer && rm composer-setup.php && \
-    chmod +x /usr/local/bin/composer && \
-    addgroup bar && \
-    adduser --home=/home --shell=/bin/bash --ingroup=bar --disabled-password --quiet foo && \
-    composer global require symfony/flex && chown -R foo:bar /home/.composer
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+&& composer --version
 
-ADD entrypoint.sh /usr/local/bin/entrypoint
+# Set timezone
+RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone \
+&& printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini \
+&& "date"
+
+# Type docker-php-ext-install to see available extensions
+RUN docker-php-ext-install pdo pdo_mysql
+
+
+# install xdebug
+RUN pecl install xdebug \
+&& docker-php-ext-enable xdebug \
+&& echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "display_startup_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+&& echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+
+RUN echo 'alias sf="php app/console"' >> ~/.bashrc \
+&& echo 'alias sf3="php bin/console"' >> ~/.bashrc
+
+WORKDIR /var/www/symfony
