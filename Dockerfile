@@ -2,16 +2,15 @@
 FROM php:7.1-fpm
 ARG TIMEZONE
 
-RUN apt-get update && apt-get install -y \
-    openssl \
-    git \
-    unzip
-    
+RUN apt-get -qq update \
+        && apt-get install --assume-yes --no-install-recommends apt-utils zip curl mysql-client git ruby-dev rubygems \
+        && gem update --system \
+        && gem install compass \
+        && gem install dpl \
+        && gem install aws-sdk
 
-RUN sudo apt install ruby ruby-dev
-
-RUN gem install sass \
-    compass
+RUN gem install sass
+RUN gem install compass
     
 
 # Install Composer
