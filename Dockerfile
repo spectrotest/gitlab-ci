@@ -5,10 +5,12 @@ ARG TIMEZONE
 RUN apt-get update && apt-get install -y \
     openssl \
     git \
-    unzip \
-    make ruby ruby-dev \
-    php-xdebug
-  
+    unzip
+    
+RUN sudo apt install curl 
+
+RUN sudo apt-get install make ruby ruby-dev
+
 RUN sudo gem install sass \
     compass
     
