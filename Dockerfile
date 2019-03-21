@@ -5,13 +5,10 @@ ARG TIMEZONE
 RUN apt-get -qq update \
         && apt-get install --assume-yes --no-install-recommends apt-utils zip curl mysql-client git ruby-dev rubygems \
         && gem update --system \
+        && gem install sass \
         && gem install compass \
         && gem install dpl \
         && gem install aws-sdk
-
-RUN gem install sass
-RUN gem install compass
-    
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
