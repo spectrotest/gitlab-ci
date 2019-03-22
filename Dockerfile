@@ -40,9 +40,5 @@ RUN echo 'alias sf="php app/console"' >> ~/.bashrc \
 
 WORKDIR /var/www/symfony
 
-RUN apt-get update -y \
-  && apt-get install -y \
-    libxml2-dev \
-    php-soap \
-  && apt-get clean -y \
-  && docker-php-ext-install soap
+RUN docker-php-ext-install -j$(nproc) gd iconv pdo pdo_mysql pdo_pgsql curl \
+    bcmath mcrypt mbstring json xml xmlrpc zip intl opcache
