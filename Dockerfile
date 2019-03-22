@@ -42,4 +42,4 @@ WORKDIR /var/www/symfony
 
 RUN rm /etc/apt/preferences.d/no-debian-php
 
-RUN apt-get update -yqq && \ apt-get -y install libxml2-dev php-soap
+RUN apt-get -y install libxml2-dev php-soap
